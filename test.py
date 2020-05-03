@@ -1,5 +1,17 @@
-import random
+from collections import deque
 
-result = ['9시','10시','11시','6시30분']
-i = random.randrange(0,3)
-print(result[i])
+result = 27
+ans = deque()     
+while result > 0:
+    if result%2 == 1:
+        ans.appendleft('1')
+        result //= 2
+        print(result)
+    else:
+        ans.appendleft('0')
+        result //=2
+        print(result)
+
+print(ans)
+
+    
