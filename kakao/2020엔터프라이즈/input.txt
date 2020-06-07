@@ -1,0 +1,13 @@
+4
+drx 2 t1 1
+drx 1 gen 2
+t1 1 gen 2
+t1 2 drx 1
+kt 1 drx 2
+t1 0 kt 2
+drx 2 kt 1
+gen 1 t1 2
+gen 2 kt 0
+gen 1 drx 2
+kt 0 t1 2
+kt 2 gen 0
