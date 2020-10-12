@@ -1,29 +1,32 @@
-from collections import deque
+tickets = [["ICN", "SFO"], ["ICN", "ATL"], ["SFO", "ATL"], ["ATL", "ICN"], ["ATL", "SFO"]]
 def solution(tickets):
     answer = []
+    graph = dict()
+    for airports in tickets:
+        if airports[0] not in graph:
+            graph[airports[0]] = [airports[1]]
+        else:
+            graph[airports[0]].append(airports[1])
 
-    airports =[]
-    # 공항장소
-    for i in range(len(tickets)):
-        airports.append(tickets[i][0])
-        airports.append(tickets[i][1])
-    airports= list(set(airports))   
-    
-    visited = [0]*len(tickets) 
-    
-    q = deque()
-    q.append('ICN')
-    answer.append('INC')
-    cnt = 0
-    while q:
-        x = q.popleft()
-        visited[tickets.index(x)] = 1
-     
-        for i in range(len(tickets)):
-            if tickets[i][0] == x and visited[airports.index(tickets[i][1])]==0 :
-                q.append(tickets[i][1])
-                answer.append(tickets[i][1])
+    for k in graph.keys():
+        graph[k].sort(reverse=True)
 
-    return answer
+    stack = ["ICN"]
+    visited = []
+    ans = []
+    while stack:
+        root = stack[-1]
+        if root not in graph or len(graph[root]) == 0:
+            ans.append(stack.pop())
+        else:
+            stack.append(graph[root][-1])
+            graph[root].pop()
+            
+    ans.reverse()
+    return ans
 
-print(solution([['ICN', 'SFO'], ['ICN', 'ATL'], ['SFO', 'ATL'], ['ATL', 'ICN'], ['ATL','SFO']]))
+print(solution(tickets))
+
+# # s = ['ICN']
+# # s += ['ATL', 'SFO', 'SFO']
+# # print(s)
