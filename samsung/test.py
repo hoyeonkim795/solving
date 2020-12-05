@@ -1,84 +1,59 @@
-import sys
-from collections import deque
-sys.stdin = open("input.txt",'r')
-
-w_1 =deque([int(x) for x in input()])
-w_2 =deque([int(x) for x in input()])
-w_3=deque([int(x) for x in input()])
-w_4=deque([int(x) for x in input()])
-k=int(input())
-num = []
-dir = []
-for _ in range(k):
-    n,d = map(int,input().split())
-    num.append(n)
-    dir.append(d)
-def rotate_r(a,b,d): #도는 주체가 a 오른쪽
-    if a[2] != b[6]:
-        d = -d
+def scatter_sand(N, sand_field, r, c, direction):
+    ans = 0
+    value = sand_field[r][c]
+    for i in range(9):
+        mr, mc = weight[direction][i]
+        nr, nc = r + mr, c + mc
+        sand = int((value * percent[i])/100)
+        sand_field[r][c] -= sand
+        if nr <0 or nc <0 or nr >= N or nc >= N:
+            ans += sand
+            continue
+        sand_field[nr][nc] += sand
+    mr, mc = move[direction]
+    nr, nc = r + mr, c + mc
+    if nr < 0 or nc < 0 or nr >= N or nc >= N:
+        ans += sand_field[r][c]
+        sand_field[r][c] = 0
     else:
-        d = 0
-    return d #b의 d
-def rotate_l(a,b,d):
-    if a[6]!=b[2]:
-        d=-d
-    else:
-        d=0
-    return d
+        sand_field[nr][nc] += sand_field[r][c]
+        sand_field[r][c] = 0
+    return ans
 
-def rotate(w_1,w_2,w_3,w_4,n,d):
-    # 1 > 2 > 3 > 4
-    # 2 > 1,3 >4
-    # 3> >2,4 >1
-    # 4>3>2>1
-    if n == 1:
-        d_2 = rotate_r(w_1,w_2,d)
-        d_3 = rotate_r(w_2,w_3,d_2)
-        d_4 = rotate_r(w_3,w_4,d_3)
-        w_1.rotate(d)
-        w_2.rotate(d_2)
-        w_3.rotate(d_3)
-        w_4.rotate(d_4)
-    elif n ==2:
-        d_1 = rotate_l(w_2,w_1,d)
-        d_3 = rotate_r(w_2,w_3,d)
-        d_4 = rotate_r(w_3,w_4,d_3)
-        w_2.rotate(d)
-        w_1.rotate(d_1)
-        w_3.rotate(d_3)
-        w_4.rotate(d_4)
-    elif n ==3:
-        d_2 =rotate_l(w_3,w_2,d)
-        d_1 =rotate_l(w_2,w_1,d_2)
-        d_4=rotate_r(w_3,w_4,d)
-        w_3.rotate(d)
-        w_2.rotate(d_2)
-        w_1.rotate(d_1)
-        w_4.rotate(d_4)
-    elif n==4:
-        d_3= rotate_l(w_4,w_3,d)
-        d_2=rotate_l(w_3,w_2,d_3)
-        d_1=rotate_l(w_2,w_1,d_2)
-        w_4.rotate(d)
-        w_3.rotate(d_3)
-        w_2.rotate(d_2)
-        w_1.rotate(d_1)
-    return (w_1,w_2,w_3,w_4)
 
-        
-#main
-for i in range(k):
-    w_1,w_2,w_3,w_4 = rotate(w_1,w_2,w_3,w_4,num[i],dir[i])
-    print(w_1,w_2,w_3,w_4)
 
-ans = 0
-if w_1[0] == 1:
-    ans +=1
-if w_2[0] ==1:
-    ans+=2
-if w_3[0] ==1:
-    ans+=4
-if w_4[0]==1:
-    ans+=8
 
-print(ans)
+#1:왼쪽, 2: 아래, 3:오른쪽, 4:위
+answer = 0
+N = int(input())
+board = [[int(x) for x in input().split()] for _ in range(n)]
+r, c = N // 2, N // 2
+
+direction = 0
+move = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+distance = 0
+weight = [
+    [(-1, 1), (1, 1), (-1, 0), (1, 0), (-1, -1), (1, -1), (-2, 0), (2, 0), (0, -2)],
+    [(-1, -1), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 1), (0, -2), (0, 2), (2, 0)],
+    [(-1, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (1, 1), (-2, 0), (2, 0), (0, 2)],
+    [(1, -1), (1, 1), (0, -1), (0, 1), (-1, -1), (-1, 1), (0, -2), (0, 2), (-2, 0)],
+]
+percent = [1, 1, 7, 7, 10, 10, 2, 2, 5]
+
+
+for i in range(N-1):
+    distance += 1
+    for j in range(2):
+        for k in range(distance):
+            mr, mc = move[direction]
+            r, c = r + mr, c + mc
+
+            answer += scatter_sand(N, board, r, c, direction)
+        direction = (direction + 1) % 4
+for k in range(distance):
+    mr, mc = move[direction]
+    r, c = r + mr, c + mc
+
+    answer += scatter_sand(N, board, r, c, direction)
+
+print(answer)
