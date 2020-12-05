@@ -2,225 +2,58 @@ import sys
 sys.stdin = open("input.txt",'r')
 n = int(input())
 board = [[int(x) for x in input().split()] for _ in range(n)]
-dir = [(0,-1),(1,0),(0,1),(-1,0)]
-# 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 
-
-##### 흩날리는 모래 비율 (r,c 기준)
-# '''''''
-# 0 0  2 0 0 
-# 0 10 7 1 0
-# 5 a  y x 0
-# 0 10 7 1 0
-# 0 0  2 0 0
-# '''''''
-def spread_0(r,c,result):
-    try:
-        board[r-2][c] += board[r][c+1] * 2 // 100
-    except IndexError:
-        result += board[r][c+1] * 2 // 100
-    try:
-        board[r-1][c+1] += board[r][c+1] * 1 // 100
-    except IndexError:
-        result += board[r][c+1] * 1 // 100
-    try:
-        board[r-1][c] += board[r][c+1] * 7 // 100
-    except IndexError:
-        result += board[r][c+1] * 7 // 100
-    try:
-        board[r-1][c-1] += board[r][c+1] * 10 // 100
-    except IndexError:
-        result += board[r][c+1] * 10 // 100
-    try:
-        board[r][c-2] += board[r][c+1] * 5 // 100
-    except IndexError:
-        result += board[r][c+1] * 5 // 100
-    try:
-        board[r+1][c-1] += board[r][c+1] * 10 // 100
-    except IndexError:
-        result += board[r][c+1] * 10 // 100
-    try:
-        board[r+1][c] += board[r][c+1] * 7 // 100
-    except IndexError:
-        result += board[r][c+1] * 7 // 100
-    try:
-        board[r+1][c+1] += board[r][c+1] * 1 // 100
-    except IndexError:
-        result += board[r][c+1] * 1 // 100
-    try:
-        board[r+2][c] += board[r][c+1] * 2 // 100
-    except IndexError:
-        result += board[r][c+1] * 2 // 100
-    # 남은 모래양
-    try:
-        board[r][c-1] += board[r][c+1] * 55 // 100
-    except IndexError:
-        result += board[r][c+1] * 55 // 100
-
-    board[r][c+1] = 0
-    return board, result
-def spread_1(r,c,result):
-    try:
-        board[r][c-2] += board[r-1][c] * 2 // 100
-    except IndexError:
-        result += board[r-1][c] * 2 // 100
-    try:
-        board[r-1][c-1] += board[r-1][c] * 1 // 100
-    except IndexError:
-        result += board[r-1][c] * 1 // 100
-    try:
-        board[r][c-1] += board[r-1][c] * 7 // 100
-    except IndexError:
-        result += board[r-1][c] * 7 // 100
-    try:
-        board[r+1][c-1] += board[r-1][c] * 10 // 100
-    except IndexError:
-        result += board[r-1][c] * 10 // 100
-    try:
-        board[r+2][c] += board[r-1][c] * 5 // 100
-    except IndexError:
-        result += board[r-1][c] * 5 // 100
-    try:
-        board[r+1][c+1] += board[r-1][c] * 10 // 100
-    except IndexError:
-        result += board[r-1][c] * 10 // 100
-    try:
-        board[r][c+1] += board[r-1][c] * 7 // 100
-    except IndexError:
-        result += board[r-1][c] * 7 // 100
-    try:
-        board[r-1][c+1] += board[r-1][c] * 1 // 100
-    except IndexError:
-        result += board[r-1][c] * 1 // 100
-    try:
-        board[r][c+2] += board[r-1][c] * 2 // 100
-    except IndexError:
-        result += board[r-1][c] * 2 // 100
-    # 남은 모래양
-    try:
-        board[r+1][c] += board[r-1][c] * 55 // 100
-    except IndexError:
-        result += board[r-1][c] * 55 // 100
-
-    board[r-1][c] = 0
-    return board, result
-def spread_2(r,c,result):
-    try:
-        board[r-2][c] += board[r][c-1] * 2 // 100
-    except IndexError:
-        result += board[r][c-1] * 2 // 100
-    try:
-        board[r-1][c-1] += board[r][c-1] * 1 // 100
-    except IndexError:
-        result += board[r][c-1] * 1 // 100
-    try:
-        board[r+1][c] += board[r][c-1] * 7 // 100
-    except IndexError:
-        result += board[r][c-1] * 7 // 100
-    try:
-        board[r-1][c+1] += board[r][c-1] * 10 // 100
-    except IndexError:
-        result += board[r][c-1] * 10 // 100
-    try:
-        board[r][c+2] += board[r][c-1] * 5 // 100
-    except IndexError:
-        result += board[r][c-1] * 5 // 100
-    try:
-        board[r+1][c+1] += board[r][c-1] * 10 // 100
-    except IndexError:
-        result += board[r][c-1] * 10 // 100
-    try:
-        board[r-1][c] += board[r][c-1] * 7 // 100
-    except IndexError:
-        result += board[r][c-1] * 7 // 100
-    try:
-        board[r+1][c-1] += board[r][c-1] * 1 // 100
-    except IndexError:
-        result += board[r][c-1] * 1 // 100
-    try:
-        board[r+2][c] += board[r][c-1] * 2 // 100
-    except IndexError:
-        result += board[r][c-1] * 2 // 100
-    # 남은 모래양
-    try:
-        board[r][c+1] += board[r][c-1] * 55 // 100
-    except IndexError:
-        result += board[r][c-1] * 55 // 100
-
-    board[r][c-1] = 0
-    return board, result
-def spread_3(r,c,result):
-    try:
-        board[r][c-2] += board[r+1][c] * 2 // 100
-    except IndexError:
-        result += board[r+1][c] * 2 // 100
-    try:
-        board[r+1][c-1] += board[r+1][c] * 1 // 100
-    except IndexError:
-        result += board[r+1][c] * 1 // 100
-    try:
-        board[r][c-1] += board[r+1][c] * 7 // 100
-    except IndexError:
-        result += board[r+1][c] * 7 // 100
-    try:
-        board[r-1][c-1] += board[r+1][c] * 10 // 100
-    except IndexError:
-        result += board[r+1][c] * 10 // 100
-    try:
-        board[r-2][c] += board[r+1][c] * 5 // 100
-    except IndexError:
-        result += board[r+1][c] * 5 // 100
-    try:
-        board[r-1][c+1] += board[r+1][c] * 10 // 100
-    except IndexError:
-        result += board[r+1][c] * 10 // 100
-    try:
-        board[r][c+1] += board[r+1][c] * 7 // 100
-    except IndexError:
-        result += board[r+1][c] * 7 // 100
-    try:
-        board[r+1][c+1] += board[r+1][c] * 1 // 100
-    except IndexError:
-        result += board[r+1][c] * 1 // 100
-    try:
-        board[r][c+2] += board[r+1][c] * 2 // 100
-    except IndexError:
-        result += board[r+1][c] * 2 // 100
-    # 남은 모래양
-    try:
-        board[r-1][c] += board[r+1][c] * 55 // 100
-    except IndexError:
-        result += board[r+1][c] * 55 // 100
-
-    board[r+1][c] = 0
-    return board, result
 r,c = n//2,n//2
-time = 1
-result = 0
 
+time =1
+
+dir = [(0,-1),(1,0),(0,1),(-1,0)]
+
+sand = [[(0,-2,5),(-1,-1,10),(-1,0,7),(-1,1,1),(-2,0,2),(1,-1,10),(1,0,7),(1,1,1),(2,0,2),(0,-1),(0,1)],
+[(1,1,10),(1,-1,10),(2,0,5),(-1,-1,1),(-1,1,1),(0,-2,2),(0,2,2),(0,-1,7),(0,1,7),(1,0),(-1,0)],
+[(0,2,5),(-1,0,7),(1,0,7),(-1,1,10),(-1,2,1),(-2,0,2),(1,1,10),(1,2,1),(2,0,2),(0,1),(0,-1,0)],
+[(0,-2,2),(0,2,2),(0,-1,7),(0,1,7),(-1,-1,10),(-1,1,10),(-2,0,5),(1,-1,1),(1,1,1),(-1,0),(1,0)]]
+
+
+
+def spread(x,y,r,c,dx,dy,m,result,board):
+    total = 0
+    if -1 < r+dx < n and -1 < c+dy < n: 
+        board[r+dx][c+dy] += board[x][y]*m // 100
+        total += board[x][y]*m // 100
+
+    else:
+        result += board[x][y]*m // 100
+        total += board[x][y]*m // 100
+
+    return board, result, total
+
+result = 0
 while (r,c) != (0,0):
-    for d in range(4):
-        dx,dy =  dir[d][0],dir[d][1]
+    for i in range(4):
         for _ in range(time):
-            r, c = r+dx, c+dy
-            if d == 0:
-                board,result = spread_0(r,c,result)
-                print(board,result)
-            elif d == 1:
-                board,result = spread_1(r,c,result)
-                print(board,result)
-            elif d == 2:
-                board,result = spread_2(r,c,result)
-                print(board,result)
-            elif d == 3:
-                board,result = spread_3(r,c,result)
-                print(board,result)
+            r,c = r+dir[i][0], c+dir[i][1]
+            x,y = r+sand[i][10][0],c+sand[i][10][1]
+            a,b = r+sand[i][9][0],c+sand[i][9][1]
+            sub = 0
+            for s in range(9):
+                dx,dy,m = sand[i][s][0],sand[i][s][1],sand[i][s][2]
+                board, result, total = spread(x,y,r,c,dx,dy,m,result,board)
+                sub += total
+            if -1< a < n and -1 < b < n:
+                board[a][b] += board[x][y] - sub
+            else:
+                result += board[x][y] - sub
+            board[x][y] = 0
+            print(r,c)
+            print(board)
+            print(result)
             if (r,c) == (0,0):
-                break
-        if d == 1 or d == 3:
-            time += 1 
-        if (r,c)==(0,0):
+                break 
+        if (r,c) == (0,0):
             break
+        if i == 1 or i == 3:
+            time += 1
+
+
 
 print(result)
-
-
