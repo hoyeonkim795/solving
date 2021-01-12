@@ -1,85 +1,83 @@
-import sys
-sys.stdin = open("input.txt",'r')
 from copy import deepcopy
-board = [[0]*4 for _ in range(4)]
-for i in range(4):
-    arr = [int(x) for x in input().split()]
-    for j in range(4):
-        board[i][j] = [arr[j*2],arr[j*2+1]]
+import sys
+sys.stdin = open('input.txt','r')
 
-dir = [(-1,0),(-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1)]
-eat_num = board[0][0][0]
-dead_fish = [board[0][0][0]]
-board[0][0][0] = -1
+old_board = [[int(x) for x in input().split()] for _ in range(4)]
+board = [[(0,0) for _ in range(4)] for _ in range(4)]
+for i in range(4):
+    for j in range(4):
+        board[i][j] = (old_board[i][2*j],old_board[i][2*j+1])
+
+# board = (물고기 번호, 물고기의 방향)
+
+dir = [(-1,0),(-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1)] #↑, ↖, ←, ↙, ↓, ↘, →, ↗
+
+# 상어는 (0,0) 부터 항상 시작
+# 물고기를 먹고 (0,0) 자리에 들어간다 
+# 그리고 (0,0)의 물고기의 방향을 갖게된다
+shark_position = (0,0)
+shark_size,shark_dir = board[0][0]
+board[0][0] = ('Shark',shark_size,shark_dir)
+
+# 물고기의 이동!
+# 물고기가 이동할 수 있는 경우는 다른 물고기가 있고, 상어가 없을경우
+# 이동할 수 있을때까지 반시계 방향으로 45도 회전
 def fish_move(board):
-    for num in range(1,17):
+    num = 1
+    while num < 17:
         flag = 0
-        if num in dead_fish:
-            continue
         for i in range(4):
             for j in range(4):
-                if board[i][j][0] == num:
-                    flag = 1
-                    dx, dy = dir[board[i][j][1]-1]
-                    nx, ny = i + dx, j + dy
-                    if -1 < nx < 4 and -1 < ny < 4 and board[nx][ny] != [0,0] and board[nx][ny][0] != -1:
-                        # nx, ny 가 범위 안에 들어오고 물고기가 있고 상어가 없는 자리라면
-                        board[nx][ny], board[i][j] = board[i][j], board[nx][ny]
-
-                    else:
-                        k = board[i][j][1]
-                        while True:
-                            k += 1 
-                            k %= 8
-                            dx, dy = dir[k-1]
-                            nx, ny = i + dx, j + dy
-                            if -1 < nx < 4 and -1 < ny < 4 and board[nx][ny] != [0,0] and board[nx][ny][0] != -1:
-                                board[i][j][1] = k
-                                board[nx][ny], board[i][j] = board[i][j], board[nx][ny]
-                                break
+                 # 'Shark' 가 아니고 num과 board[i][j][0] 가 찾으려는 물고기 번호와 같을경우 
+                if type(board[i][j][0]) == int and board[i][j][0] == num:
+                    fish_dir = board[i][j][1]-1
+                    while True: # 물고기가 이동할 수 있을 떄 까지 방향 계속 45도 반시계 회전
+                        dx,dy = dir[fish_dir]
+                        # 상어가 없고 물고기가 있는 자리이며 범위 안에들어올경우 
+                        if -1 < i+dx < 4 and -1 < j+dy <4 and board[i+dx][j+dy][0] != 'Shark' and board[i+dx][j+dy] != 0: 
+                            board[i][j], board[i+dx][j+dy] = board[i+dx][j+dy],board[i][j]
+                            flag = 1
+                            break
+                        else:
+                            fish_dir = (fish_dir + 1)%8
+                            board[i][j] = (board[i][j][0],fish_dir+1)
                 if flag == 1:
                     break
             if flag == 1:
                 break
+
+        num += 1
     return board
 
 board = fish_move(board)
-print(board)
-def can_eat(a,b,board,eat_num):
-    fishes = []
-    dx, dy = dir[board[a][b][1]-1]
-    for i in range(1,4):
-        nx, ny = a+dx*i, b+dy*i
-        if -1 < nx < 4 and -1 < ny < 4 and board[nx][ny] != [0,0]:
-            fishes.append((a,b,nx,ny,board, eat_num))
-    return fishes
-
-
-stack = can_eat(0,0,board,eat_num)
-result = []
+# print(board)
+# 물고기가 모두 이동했으니 이제 상어가 이동할 순서이다.
+# 상어가 이동 할 수 있는 좌표 후보군들 찾기
+stack = []
+def shark_stack(stack, shark_size, shark_dir, shark_position, board):
+    x, y = shark_position
+    for k in range(1,4):
+        new_board = deepcopy(board)
+        dx,dy = dir[shark_dir-1]
+        dx *= k
+        dy *= k
+        if -1 < x+dx < 4 and -1 < y+dy < 4 and board[x+dx][y+dy][0] != 0: # 범위안에 들어가고 물고기가 있는 자리
+            new_shark_size = shark_size + new_board[x+dx][y+dy][0]
+            new_shark_dir = new_board[x+dx][y+dy][1]
+            new_board[x+dx][y+dy] = ('Shark',new_shark_size,new_shark_dir)
+            new_shark_position = (x+dx,y+dy)
+            new_board[x][y] = (0,0)
+            stack.append([new_shark_size, new_shark_dir, new_shark_position, new_board])
+    return stack
+stack = shark_stack(stack, shark_size, shark_dir, shark_position, board)
+# print(stack)
+max_fish_size = 0
 while stack:
-    a, b, nx, ny, board, eat_num = stack.pop() # 새로운 상어가 위치한자리
-    print(a, b, nx, ny, eat_num)
-    new_board = deepcopy(board)
-    print(new_board)
-    # 상어가 새로운 자리에있는 물고기를 먹는다.
-    eat_num += board[nx][ny][0]
-    result.append(eat_num)
-    dead_fish.append(board[nx][ny][0])
-    new_board[nx][ny][0] = -1
-    # 원래 있던 자리는 물고기 먹어서 사라졌다.
-    new_board[a][b] = [0,0]
-    # 물고기가 이동한다.
-    new_board = fish_move(new_board)
-    print(new_board)
-    # 새로 이동한 자리에서 먹을 수 있는 물고기의 후보들을 찾는다.
-    # print('can eat',can_eat(nx,ny,new_board,eat_num))
-    new_stack = can_eat(nx,ny,new_board,eat_num)
-    stack += new_stack
-    
+    shark_size, shark_dir, shark_position, board = stack.pop()
+    if shark_size > max_fish_size:
+        max_fish_size = shark_size
+    # 물고기 이동
+    board = fish_move(board)
+    stack = shark_stack(stack, shark_size, shark_dir, shark_position, board)
 
-
-
-
-print(result)
-
+print(max_fish_size)
