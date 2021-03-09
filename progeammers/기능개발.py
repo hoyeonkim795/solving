@@ -1,24 +1,23 @@
 from collections import deque
+import math
+
 def solution(progresses, speeds):
     answer = []
-    n = len(progresses)
-    progresses = deque(progresses)
-    speeds = deque(speeds)
+    done = []
+    for idx, progress in enumerate(progresses):
+        days = math.ceil((100 - progress)/speeds[idx])
+        done.append(days)
+    now = done[0]
     cnt = 0
-    day = 0
-    while progresses:
-        if progresses[0] + speeds[0]*day>= 100:
-            progresses.popleft()
-            speeds.popleft()
+    for i in range(len(done)):
+        if done[i] <= now:
             cnt += 1
         else:
-            day += 1
-            if cnt > 0:
-                answer.append(cnt)
-            cnt = 0
-
+            answer.append(cnt)
+            cnt = 1
+            now = done[i]
     answer.append(cnt)
-
+    
     return answer
 
-print(solution([95, 90, 99, 99, 80, 99],[1, 1, 1, 1, 1, 1]))
+print(solution([95, 90, 99, 99, 80, 99]	,	[1, 1, 1, 1, 1, 1]	))
